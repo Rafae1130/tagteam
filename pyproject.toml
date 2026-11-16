@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tagteam"
+version = "0.1.0"
+description = "Run Claude Code and Codex in shifts: hand off before a usage limit, take the work back when it resets, or sleep until the reset with one agent."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+keywords = ["claude-code", "codex", "ai-agents", "rate-limit", "automation"]
+
+[project.scripts]
+tagteam = "tagteam.cli:main"
+
+[tool.setuptools]
+packages = ["tagteam"]

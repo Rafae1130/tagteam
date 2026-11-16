@@ -1,0 +1,14 @@
+{
+  "name": "tagteam",
+  "owner": { "name": "tagteam contributors" },
+  "metadata": {
+    "description": "tagteam: keep coding sessions going past usage limits by handing them between Claude Code and Codex."
+  },
+  "plugins": [
+    {
+      "name": "tagteam",
+      "source": "./",
+      "description": "Hand a session to Codex before your usage limit and get it back after the reset, wake it up after the reset, or let two agents discuss a question until they agree."
+    }
+  ]
+}

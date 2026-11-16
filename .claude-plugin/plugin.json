@@ -1,0 +1,8 @@
+{
+  "name": "tagteam",
+  "version": "0.1.0",
+  "description": "Keep a Claude Code session going past your usage limit: hand it to Codex and get it back after the reset, wake it up automatically after the reset, or have Claude and Codex discuss a question until they agree.",
+  "author": { "name": "tagteam contributors" },
+  "license": "MIT",
+  "keywords": ["usage limit", "handoff", "codex", "session", "rate limit", "discussion"]
+}
