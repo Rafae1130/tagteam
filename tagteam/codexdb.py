@@ -304,21 +304,56 @@ def pick_model(thread_id: Optional[str] = None) -> Optional[str]:
 
 # ---- the program and the app ---------------------------------------------------------
 
+def _version_key(path: str):
+    """Newest first by the version in the app or extension folder name (not by file date)."""
+    m = re.search(r"(?:OpenAI\.Codex_|openai\.chatgpt-)(\d+(?:\.\d+)*)", path)
+    version = tuple(int(x) for x in m.group(1).split(".")) if m else ()
+    return version, os.path.getmtime(path)
+
+
+def app_codex() -> Optional[str]:
+    """The codex inside the Codex desktop app: always the same version as the app itself."""
+    if os.name == "nt":
+        cands = glob.glob(r"C:\Program Files\WindowsApps\OpenAI.Codex_*\app\resources\codex.exe")
+    elif sys.platform == "darwin":
+        cands = glob.glob("/Applications/Codex.app/Contents/Resources/codex")
+    else:
+        cands = []
+    cands = [c for c in cands if os.path.isfile(c)]
+    return max(cands, key=_version_key) if cands else None
+
+
 def find_codex() -> Optional[str]:
-    """codex on PATH, else the copy inside the Codex desktop app or the VS Code extension."""
+    """codex on PATH, else the copy inside the Codex desktop app, else the newest copy inside the
+    Codex extension for VS Code (or a fork)."""
     p = shutil.which("codex")
     if p:
         return p
+    app = app_codex()
+    if app:
+        return app
     exe = "codex.exe" if os.name == "nt" else "codex"
     cands = []
-    if os.name == "nt":
-        cands += glob.glob(r"C:\Program Files\WindowsApps\OpenAI.Codex_*\app\resources\codex.exe")
-    elif sys.platform == "darwin":
-        cands += glob.glob("/Applications/Codex.app/Contents/Resources/codex")
     for ide in (".vscode", ".vscode-insiders", ".cursor", ".windsurf"):
         cands += glob.glob(os.path.join(os.path.expanduser("~"), ide, "extensions", "openai.chatgpt-*", "bin", "*", exe))
     cands = [c for c in cands if os.path.isfile(c)]
-    return max(cands, key=os.path.getmtime) if cands else None
+    return max(cands, key=_version_key) if cands else None
+
+
+_queue_resume: Dict[str, bool] = {}
+
+
+def queue_supports_resume(exe: str) -> bool:
+    """Whether this codex's `queue` command has --resume (newer builds; older ones reject it)."""
+    if exe not in _queue_resume:
+        kw = {"creationflags": 0x08000000} if os.name == "nt" else {}  # no console window
+        try:
+            r = subprocess.run([exe, "queue", "--help"], stdin=subprocess.DEVNULL, capture_output=True,
+                               text=True, encoding="utf-8", errors="replace", timeout=60, **kw)
+            _queue_resume[exe] = "--resume" in (r.stdout or "") + (r.stderr or "")
+        except (OSError, subprocess.SubprocessError):
+            _queue_resume[exe] = False
+    return _queue_resume[exe]
 
 
 def thread_url(tid: str) -> str:

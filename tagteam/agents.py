@@ -110,10 +110,54 @@ class Agent:
             res.message = blob.strip()[-300:]
 
 
+IDE_DIRS = (".vscode", ".vscode-insiders", ".cursor", ".windsurf", ".vscode-server", ".cursor-server")
+
+
+def _extension_version(path: str):
+    m = re.search(r"anthropic\.claude-code-(\d+(?:\.\d+)*)", path)
+    version = tuple(int(x) for x in m.group(1).split(".")) if m else ()
+    return version, os.path.getmtime(path)
+
+
+def find_claude() -> Optional[str]:
+    """claude on PATH; else the native installer's copy when PATH does not include it; else the newest
+    copy carried by the Claude Code extension for VS Code (or a fork), so people who only use the
+    extension need nothing else; else the copy that started this process."""
+    p = shutil.which("claude")
+    if p:
+        return p
+    exe = "claude.exe" if os.name == "nt" else "claude"
+    home = os.path.expanduser("~")
+    local = os.path.join(home, ".local", "bin", exe)
+    if os.path.isfile(local):
+        return local
+    cands = []
+    for ide in IDE_DIRS:  # looked up on every turn: an extension update removes the old folder
+        cands += glob.glob(os.path.join(home, ide, "extensions", "anthropic.claude-code-*", "resources",
+                                        "native-binary", exe))
+    cands = [c for c in cands if os.path.isfile(c)]
+    if cands:
+        return max(cands, key=_extension_version)
+    running = os.environ.get("CLAUDE_CODE_EXECPATH", "")
+    if running and os.path.basename(running).lower().startswith("claude") and os.path.isfile(running):
+        return running
+    return None
+
+
 class ClaudeAgent(Agent):
     """Claude Code in print mode with stream-json output."""
 
     supports_resume = True
+
+    def _exe(self):
+        if self.base[0] != "claude" or shutil.which(self.base[0]):
+            return super()._exe()
+        found = find_claude()  # the VS Code extension carries its own claude
+        return [found] + self.base[1:] if found else super()._exe()
+
+    def available(self):
+        exe = self._exe()[0]
+        return bool(shutil.which(exe)) or os.path.isfile(exe)
 
     def build(self, prompt, resume=None):
         cmd = self._exe() + ["-p", "--output-format", "stream-json", "--verbose"]
@@ -196,7 +240,13 @@ class CodexAgent(Agent):
         self._opened = set()
 
     def _exe(self):
-        if self.base[0] != "codex" or shutil.which(self.base[0]):
+        if self.base[0] != "codex":
+            return super()._exe()
+        if self.cfg.get("gui"):
+            app = codexdb.app_codex()  # in app mode, the app's own copy always matches the app
+            if app:
+                return [app] + self.base[1:]
+        if shutil.which(self.base[0]):
             return super()._exe()
         found = codexdb.find_codex()  # the desktop app and the VS Code extension carry their own codex
         return [found] + self.base[1:] if found else super()._exe()
@@ -315,7 +365,9 @@ class CodexAgent(Agent):
                 f.write(prompt)
             msg = ("Read the file .tagteam/codex-prompt.md in this folder and follow it exactly; "
                    "it is the message for this turn.")
-        cmd = self._exe() + ["queue", "--thread", tid, "--message", msg, "--resume"]
+        cmd = self._exe() + ["queue", "--thread", tid, "--message", msg]
+        if codexdb.queue_supports_resume(cmd[0]):
+            cmd.append("--resume")  # start the turn right away; older builds lack it and wait for the app
         try:
             out = proc.run(cmd, cwd, None, 120, log_path, self.env(), stop=stop)
         except OSError as e:

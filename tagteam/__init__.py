@@ -9,4 +9,4 @@ if _sys.version_info < (3, 9):
                       "Python (python.org) and run tagteam with it.\n" % tuple(_sys.version_info[:2]))
     raise SystemExit(1)
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"

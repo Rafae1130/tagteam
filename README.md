@@ -29,12 +29,26 @@ macOS and Linux with Python 3.9 or newer.
 
 - Python 3.9+
 - git
-- The agent CLIs you want to use, installed and logged in:
-  [Claude Code](https://code.claude.com/docs) (`claude`) and/or
-  [Codex CLI](https://github.com/openai/codex) (`codex`). Other CLIs can be added as
-  [custom agents](#other-agents).
+- The agents you want to use, installed and logged in:
+  [Claude Code](https://code.claude.com/docs) and/or [Codex](https://github.com/openai/codex).
+  The VS Code extensions are enough: when `claude` or `codex` is not on PATH, tagteam uses the copy
+  that the Claude Code extension, the Codex extension or the Codex app carries. Other CLIs can be
+  added as [custom agents](#other-agents).
 
 ## Install
+
+**VS Code:** [![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_tagteam-0098FF?logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect?url=vscode%3A%2F%2Fanthropic.claude-code%2Finstall-plugin%3Fplugin%3Dtagteam%26marketplace%3DRafae1130%2Ftagteam)
+
+Click the button and VS Code opens the Claude Code plugin dialog with tagteam filled in. Press
+**Add Marketplace & Continue**, then install, and start a new chat to get the `/tagteam:` commands.
+Or, in the Claude chat, type `/`, pick **Manage plugins**, add the marketplace `Rafae1130/tagteam`
+and install tagteam from it. You don't need the Claude Code terminal app.
+
+**Claude Code in a terminal:** `/plugin install tagteam --marketplace Rafae1130/tagteam`
+
+More ways, and the full command list: [Claude Code plugin](#claude-code-plugin).
+
+**Only the `tagteam` terminal command**, without Claude Code plugins:
 
 ```sh
 pipx install git+https://github.com/Rafae1130/tagteam      # or: pip install .
@@ -110,7 +124,8 @@ chat afterwards).
 
 - **Claude Code in a terminal:** type `/plugin install tagteam --marketplace Rafae1130/tagteam`.
   Older versions: `/plugin marketplace add Rafae1130/tagteam`, then `/plugin install tagteam@tagteam`.
-- **VS Code:** the extension's chat has no `/plugin` command. Open
+- **VS Code:** the extension's chat has no `/plugin` command. Type `/` and pick **Manage plugins**
+  to add the marketplace `Rafae1130/tagteam` and install tagteam, or open
   [this install link](https://vscode.dev/redirect?url=vscode%3A%2F%2Fanthropic.claude-code%2Finstall-plugin%3Fplugin%3Dtagteam%26marketplace%3DRafae1130%2Ftagteam)
   and VS Code opens the Claude Code plugin dialog with tagteam filled in. You can also paste
   `vscode://anthropic.claude-code/install-plugin?plugin=tagteam&marketplace=Rafae1130/tagteam` into
