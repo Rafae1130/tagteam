@@ -104,13 +104,29 @@ everywhere.
 
 ## Claude Code plugin
 
-The repository is also a Claude Code plugin. In Claude Code:
+The repository is also a Claude Code plugin. Install it whichever way fits; the terminal and the
+VS Code extension share their plugins, so installing once gives you the commands in both (start a new
+chat afterwards).
 
-```
-/plugin install tagteam --marketplace Rafae1130/tagteam
-```
+- **Claude Code in a terminal:** type `/plugin install tagteam --marketplace Rafae1130/tagteam`.
+  Older versions: `/plugin marketplace add Rafae1130/tagteam`, then `/plugin install tagteam@tagteam`.
+- **VS Code:** the extension's chat has no `/plugin` command. Open
+  [this install link](https://vscode.dev/redirect?url=vscode%3A%2F%2Fanthropic.claude-code%2Finstall-plugin%3Fplugin%3Dtagteam%26marketplace%3DRafae1130%2Ftagteam)
+  and VS Code opens the Claude Code plugin dialog with tagteam filled in. You can also paste
+  `vscode://anthropic.claude-code/install-plugin?plugin=tagteam&marketplace=Rafae1130/tagteam` into
+  your browser's address bar.
+- **Any shell, including VS Code's terminal:** `claude plugin install tagteam --marketplace Rafae1130/tagteam`
+- **A settings file:** put this in `~/.claude/settings.json`, or in a project's
+  `.claude/settings.json` so everyone who opens that project is offered tagteam:
 
-(Older Claude Code versions: `/plugin marketplace add Rafae1130/tagteam`, then `/plugin install tagteam@tagteam`.)
+  ```json
+  {
+    "extraKnownMarketplaces": {
+      "tagteam": { "source": { "source": "github", "repo": "Rafae1130/tagteam" } }
+    },
+    "enabledPlugins": { "tagteam@tagteam": true }
+  }
+  ```
 
 | Command | What it does |
 |---|---|
